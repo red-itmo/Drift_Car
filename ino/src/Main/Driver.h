@@ -52,7 +52,7 @@ public:
 		analogWrite(pwm2, n);
 	}
 
-	void parse(double vel){
+	void send(double vel){
 		if(vel >= 0.0){
 			forward(vel);
 		}

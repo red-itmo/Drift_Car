@@ -39,7 +39,7 @@ class serial_handler{
     bool buffer_update(void){
       uint8_t incoming_byte = serial->read();
 
-      if(incoming_byte == -1){
+      if(incoming_byte == -1 or !serial->available()){
         return (this->msg_buffer[this->last_access] == '>') ? true : false;
       }
 

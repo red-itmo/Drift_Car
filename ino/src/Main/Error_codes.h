@@ -1,0 +1,7 @@
+#ifndef ERROR_CODES_H
+#define ERROR_CODES_H
+
+#define ERROR_NOT_RECEIVING 0
+#define ERROR_WRONG_DATA_TYPE 1
+
+#endif
