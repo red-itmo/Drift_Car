@@ -1,6 +1,8 @@
-#include "Driver.h"
-#include "Regulator.h"
-#include "serial_port_handler.h"
+#include "Engine/Driver.h"
+#include "Engine/Regulator.h"
+#include "SerialPortHandler/Serial_port_handler.h"
+#include "DynamixelSerial/DynamixelSerial.h"
+#include "DynamixelSerial/DynamixelSerial.cpp"
 #include "Error_codes.h"
 
 //Driver.h
@@ -14,8 +16,14 @@ bool if_msg_ended;
 double * msg;
 serial_handler<15,2,&Serial> handler(9600,64);
 
+//msg vars
+char msg_back_buffer_1[50],msg_back_buffer_2[50],msg_back_buffer_3[50],msg_back_buffer_4[50];
+uint16_t dynamixel_angle;
+uint8_t error_code;
 
 void setup() {
+	Dynamixel.begin(100000, 2);
+	delay(1000);
 	pinMode(interruptPin, INPUT_PULLUP);
 	attachInterrupt(digitalPinToInterrupt(interruptPin), compute_v, FALLING);
 	time = millis();
@@ -26,15 +34,31 @@ void setup() {
 
 void loop(){
 	if(if_msg_ended){
-	/*
-	*
-	*	DYNAMIXEL CODE GOES HERE
-	*
-	*/
+		/*
+		*
+		*	DYNAMIXEL CODE GOES HERE
+		*
+		*/
+		//If we send angle
+		Dynamixel.moveSpeed(1,(int)msg[1], 400);
 	}
-// Serial.println("loop");
+	error_code = ERR_ALL_FINE;
+	//dynamixel_angle = Dynamixel.readPosition(1);
 
-	//	msg_back = "<" + str(engine_velocity) + ";" + str(dynamixel_alpha or dynamixel_velocity) + ";" + str(current_time) + ";" + str(error_code) + ">";
+	// convert all data to str and send back
+	sprintf(msg_back_buffer_1, "%d", trans_vel);
+	sprintf(msg_back_buffer_2, "%d", dynamixel_angle);
+	//TODO: millis() or cur_time ??
+	sprintf(msg_back_buffer_3, "%d", millis());
+	sprintf(msg_back_buffer_4, "%d", error_code);
+
+	char* msg_back[] = {"<",msg_back_buffer_1,";",msg_back_buffer_2,";",
+													msg_back_buffer_3,";",msg_back_buffer_4,">"};
+
+//	for(char* msg_part: msg_back){
+//		Serial.print(msg_part);
+//	}
+
 
 }
 //
