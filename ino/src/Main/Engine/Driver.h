@@ -9,6 +9,7 @@ private:
 	int enable;
 	int pwm1;
 	int pwm2;
+	float break_point = 12;
 
 public:
 	// Initialisers
@@ -38,6 +39,12 @@ public:
 		analogWrite(pwm2, 0);
 	}
 
+	void driver_break(){
+		analogWrite(pwm1, 255);
+		analogWrite(pwm2, 255);
+	}
+
+
 	void forward(double vel){
 		int n = static_cast<int>(vel);
 		if(n >= 30){ n = 30;} //30 is arbitrary
@@ -53,10 +60,13 @@ public:
 	}
 
 	void send(double vel){
-		if(vel >= 0.0){
+		if(abs(vel) <= break_point){
+			driver_break();
+		}
+		else if(vel >= break_point){
 			forward(vel);
 		}
-		else{
+		else if(vel <= -break_point){
 			backward(abs(vel));
 		}
 	}
