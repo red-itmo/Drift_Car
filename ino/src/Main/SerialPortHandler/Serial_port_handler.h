@@ -39,7 +39,7 @@ class serial_handler{
     bool buffer_update(void){
       uint8_t incoming_byte = serial->read();
 
-      if(incoming_byte == -1 or !serial->available()){
+      if(incoming_byte == -1){
         return (this->msg_buffer[this->last_access] == '>') ? true : false;
       }
 
@@ -47,7 +47,7 @@ class serial_handler{
       this->last_access++;
 
       // if not end of msg return false
-      if(incoming_byte!='>'){
+      if(incoming_byte != '>'){
         return false;
 
       }
@@ -57,52 +57,35 @@ class serial_handler{
     }
 
     double* get_msg(void){
-      uint8_t temp_buff[size_of_msg];
-      memcpy(&temp_buff, &msg_buffer, sizeof(temp_buff));
-      this->reset_buffer();
-      return this->parse(temp_buff);
+      return this->parse(msg_buffer);
     }
 
 
     //parse bytes in buffer(and skip first, last, and separator bytes) and return array of floats
     double* parse(const uint8_t buf[size_of_msg]){
-      serial->flush();
       static double answer[n_of_fields];
-      char char_buff[this->last_access - 1];
-      char value[this->max_float_size];
-      uint8_t counter;
       uint8_t counter_for_data = 0;
+      uint8_t i = 0;
+      char* end_of_value;
+      const char* char_buf = reinterpret_cast<const char*>(buf);
 
-      for(uint8_t i = 0; i < max_float_size; i++){
-        value[i] = '0';
+      // skip all until we reach header
+
+      while(char_buf[i] != '<' ){
+        ++i;
       }
 
-      for(uint8_t i = 0; i < this->last_access; ++i){
-        char_buff[i] = buf[i];
+      ++i;
+      answer[0] = strtod(&char_buf[i],NULL);
+      while(char_buf[i] != ';'){
+        ++i;
       }
+      ++i;
+      answer[1] = strtod(&char_buf[i], NULL);
 
-      for (uint8_t i = 0; i < this->last_access; ++i){
-        if(char_buff[i] == '<')
-          continue;
-        counter = 0;
-        while(char_buff[i] != ';' && char_buff[i] != '>')
-        {
-          if(char_buff[i] != ' ' && char_buff[i] != '\n'){
-            value[counter] = char_buff[i];
-            counter++;
-          }
-          i++;
-        }
-        answer[counter_for_data++] = strtod(value,NULL);
-        for(uint8_t i=0; i < max_float_size; i++){
-          value[i] = '0';
-        }
-        if(char_buff[i] == '>'){
-          break;
-        }
-      }
+      //reset last_access indx to 0 and all values of buffer to -1
       this->last_access = 0;
-
+      this->reset_buffer();
       return answer;
     }
 };
