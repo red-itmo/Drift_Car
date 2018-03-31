@@ -12,7 +12,18 @@
 Driver D;
 int reg = 0;
 //Regulator.h
+//object which computes velocity of encoder's disk
+EngineRegulator engineController;
 const byte interruptPin = 2;
+
+
+//callback function for encoder's interrupt
+void encoder_callback(){
+  noInterrupts();
+    engineController.compute_velocity();
+  interrupts();
+}
+
 
 //serial_port_handler.h
 bool if_msg_ended;
@@ -27,11 +38,13 @@ void setup() {
   
   ax12a.begin(BaudRate, DirectionPin, &Serial3);
 	pinMode(interruptPin, INPUT_PULLUP);
-	attachInterrupt(digitalPinToInterrupt(interruptPin), compute_v, FALLING);
+	attachInterrupt(digitalPinToInterrupt(interruptPin), encoder_callback, FALLING);
 
 	time = millis();
  	handler.init();
  	D.init();
+  // here as arguments: angular size of a hole, proportional coefficient
+  //engineController.setParam();
 	char* msg_back;
 }
 
