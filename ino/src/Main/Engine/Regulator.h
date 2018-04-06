@@ -18,7 +18,7 @@ private:
     // desired velocity we want
     float des_vel;
     // variables for computing elapsed time of passing one hole
-    unsigned long current_time, time, dt, trans_vel;
+    unsigned long current_time = 0, time = 0, dt = 0, trans_vel = 0;
 
 public:
     EngineRegulator(){
